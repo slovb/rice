@@ -1,8 +1,16 @@
 package com.slov.rice;
 
-import com.slov.rice.init.ModItemGroups;
+import com.slov.rice.init.ModBlocks;
+import com.slov.rice.objects.blocks.RiceBlock;
+import com.slov.rice.objects.items.RiceSeedsItem;
 
+import net.minecraft.block.Block;
+import net.minecraft.block.SoundType;
+import net.minecraft.block.material.Material;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
+import net.minecraft.item.Item.Properties;
+import net.minecraft.item.ItemGroup;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -15,7 +23,17 @@ public class ModEventSubscriber {
 	@SubscribeEvent
 	public static void onRegisterItems(RegistryEvent.Register<Item> event) {
 		event.getRegistry().registerAll(
-			setup(new Item(new Item.Properties().group(ModItemGroups.MOD_ITEM_GROUP)), "rice_seeds")
+			setup(new RiceSeedsItem(ModBlocks.RICE, new Item.Properties().group(ItemGroup.MATERIALS)), "rice_seeds"),
+			setup(new BlockItem(ModBlocks.ASDF, new Item.Properties().group(ItemGroup.MATERIALS)), "asdf")
+		);
+		
+	}
+	
+	@SubscribeEvent
+	public static void onRegisterBlocks(RegistryEvent.Register<Block> event) {
+		event.getRegistry().registerAll(
+			setup(new Block(Block.Properties.create(Material.PLANTS).hardnessAndResistance(0.0F).sound(SoundType.CROP)), "asdf"),
+			setup(new RiceBlock(Block.Properties.create(Material.PLANTS).doesNotBlockMovement().tickRandomly().hardnessAndResistance(0.0F).sound(SoundType.CROP)), "rice")
 		);
 	}
 	

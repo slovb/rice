@@ -1,4 +1,4 @@
 { 
-	"item.rice.rice_seeds": "Rice Seeds",
-	"itemGroup.rice": "Rice"
+	"block.rice.rice": "Rice",
+	"item.rice.rice_seeds": "Rice Seeds"
 }
