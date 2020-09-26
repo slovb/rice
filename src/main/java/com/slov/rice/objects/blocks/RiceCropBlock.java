@@ -48,6 +48,10 @@ public class RiceCropBlock extends CropsBlock implements IWaterLoggable {
 	public BlockState withAgeWaterlogged(int age, boolean waterlogged) {
 		return super.withAge(age).with(WATERLOGGED, Boolean.valueOf(waterlogged));
 	}
+	
+	public boolean isWaterlogged(BlockState state) {
+		return state.get(WATERLOGGED);
+	}
 
 	@Override
 	public void grow(World worldIn, BlockPos pos, BlockState state) {
@@ -57,21 +61,25 @@ public class RiceCropBlock extends CropsBlock implements IWaterLoggable {
 			i = j;
 		}
 
-		worldIn.setBlockState(pos, this.withAgeWaterlogged(i, state.get(WATERLOGGED)), 2);
+		worldIn.setBlockState(pos, this.withAgeWaterlogged(i, this.isWaterlogged(state)), 2);
 	}
+
 
 	@Override
 	public void tick(BlockState state, World worldIn, BlockPos pos, Random random) {
 		super.tick(state, worldIn, pos, random);
 		if (!worldIn.isAreaLoaded(pos, 1))
 			return; // Forge: prevent loading unloaded chunks when checking neighbor's light
+		if (!this.isWaterlogged(state)) {
+			worldIn.destroyBlock(pos, true);
+		}
 		if (worldIn.getLightSubtracted(pos, 0) >= 9) {
 			int i = this.getAge(state);
 			if (i < this.getMaxAge()) {
 				float f = getGrowthChance(this, worldIn, pos);
 				if (net.minecraftforge.common.ForgeHooks.onCropsGrowPre(worldIn, pos, state,
 						random.nextInt((int) (25.0F / f) + 1) == 0)) {
-					worldIn.setBlockState(pos, this.withAgeWaterlogged(i + 1, state.get(WATERLOGGED)), 2);
+					worldIn.setBlockState(pos, this.withAgeWaterlogged(i + 1, this.isWaterlogged(state)), 2);
 					net.minecraftforge.common.ForgeHooks.onCropsGrowPost(worldIn, pos, state);
 				}
 			}
@@ -99,7 +107,7 @@ public class RiceCropBlock extends CropsBlock implements IWaterLoggable {
 	@Override
 	public BlockState updatePostPlacement(BlockState stateIn, Direction facing, BlockState facingState, IWorld worldIn,
 			BlockPos currentPos, BlockPos facingPos) {
-		if (stateIn.get(WATERLOGGED)) {
+		if (this.isWaterlogged(stateIn)) {
 			worldIn.getPendingFluidTicks().scheduleTick(currentPos, Fluids.WATER, Fluids.WATER.getTickRate(worldIn));
 		}
 
