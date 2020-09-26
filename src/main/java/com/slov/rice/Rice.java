@@ -11,7 +11,7 @@ public class Rice
 	public static final String MODID = "rice";
 	
     // Directly reference a log4j logger.
-    private static final Logger LOGGER = LogManager.getLogger(MODID);
+    public static final Logger LOGGER = LogManager.getLogger(MODID);
 
     public Rice() {
 

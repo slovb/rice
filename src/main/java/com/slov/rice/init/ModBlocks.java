@@ -8,6 +8,5 @@ import net.minecraftforge.registries.ObjectHolder;
 @ObjectHolder(Rice.MODID)
 public class ModBlocks {
 
-	public static final Block RICE = null;
-	public static final Block ASDF = null;
+	public static final Block RICE_CROP = null;
 }

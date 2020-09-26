@@ -1,6 +1,6 @@
 {
     "parent": "block/crop",
     "textures": {
-        "crop": "rice:block/wheat_stage6"
+        "crop": "rice:block/rice_stage6"
     }
 }
