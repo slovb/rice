@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "___",
+    "_#_",
+    "___"
+  ],
+  "key": {
+    "#": {
+       "item": "minecraft:gold_nugget"
+     },
+     "_": {
+       "item": "minecraft:wheat_seeds"
+     }
+  },
+  "result": {
+    "item": "rice:rice_seeds",
+    "count": 8
+  }
+}

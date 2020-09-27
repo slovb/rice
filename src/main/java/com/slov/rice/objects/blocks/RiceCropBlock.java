@@ -48,7 +48,7 @@ public class RiceCropBlock extends CropsBlock implements IWaterLoggable {
 	public BlockState withAgeWaterlogged(int age, boolean waterlogged) {
 		return super.withAge(age).with(WATERLOGGED, Boolean.valueOf(waterlogged));
 	}
-	
+
 	public boolean isWaterlogged(BlockState state) {
 		return state.get(WATERLOGGED);
 	}
@@ -63,7 +63,6 @@ public class RiceCropBlock extends CropsBlock implements IWaterLoggable {
 
 		worldIn.setBlockState(pos, this.withAgeWaterlogged(i, this.isWaterlogged(state)), 2);
 	}
-
 
 	@Override
 	public void tick(BlockState state, World worldIn, BlockPos pos, Random random) {
@@ -123,6 +122,6 @@ public class RiceCropBlock extends CropsBlock implements IWaterLoggable {
 	@SuppressWarnings("deprecation")
 	@Override
 	public IFluidState getFluidState(BlockState state) {
-		return state.get(WATERLOGGED) ? Fluids.WATER.getStillFluidState(false) : super.getFluidState(state);
+		return this.isWaterlogged(state) ? Fluids.WATER.getStillFluidState(false) : super.getFluidState(state);
 	}
 }
