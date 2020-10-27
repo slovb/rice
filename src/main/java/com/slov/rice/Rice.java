@@ -10,12 +10,11 @@ import org.apache.logging.log4j.Logger;
 import com.slov.rice.init.ModBlocks;
 import com.slov.rice.init.ModItems;
 
-// The value here should match an entry in the META-INF/mods.toml file.
 @Mod(Rice.MODID)
-public class Rice
-{
+public class Rice {
+
 	public static final String MODID = "rice";
-	
+
     // Directly reference a log4j logger.
     public static final Logger LOGGER = LogManager.getLogger(MODID);
 

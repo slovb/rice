@@ -30,6 +30,7 @@ import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 
 public class RiceCropBlock extends CropsBlock implements IWaterLoggable {
+
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 
 	private static final VoxelShape[] SHAPE_BY_AGE = new VoxelShape[] {
@@ -43,7 +44,8 @@ public class RiceCropBlock extends CropsBlock implements IWaterLoggable {
 			Block.makeCuboidShape(0.0D, 0.0D, 0.0D, 16.0D, 16.0D, 16.0D) };
 
 	public RiceCropBlock() {
-		super(Block.Properties.create(Material.PLANTS).doesNotBlockMovement().tickRandomly().hardnessAndResistance(0.0F).sound(SoundType.CROP));
+		super(Block.Properties.create(Material.PLANTS).doesNotBlockMovement().tickRandomly().hardnessAndResistance(0.0F)
+				.sound(SoundType.CROP));
 		this.setDefaultState(this.stateContainer.getBaseState().with(this.getAgeProperty(), Integer.valueOf(0))
 				.with(WATERLOGGED, Boolean.valueOf(false)));
 	}
@@ -52,9 +54,9 @@ public class RiceCropBlock extends CropsBlock implements IWaterLoggable {
 		return super.withAge(age).with(WATERLOGGED, Boolean.valueOf(waterlogged));
 	}
 
-   protected boolean isValidGround(BlockState state, IBlockReader worldIn, BlockPos pos) {
-      return state.getBlock() == Blocks.FARMLAND || state.getBlock() == Blocks.DIRT;
-   }
+	protected boolean isValidGround(BlockState state, IBlockReader worldIn, BlockPos pos) {
+		return state.getBlock() == Blocks.FARMLAND || state.getBlock() == Blocks.DIRT;
+	}
 
 	public boolean isWaterlogged(BlockState state) {
 		return state.get(WATERLOGGED);
