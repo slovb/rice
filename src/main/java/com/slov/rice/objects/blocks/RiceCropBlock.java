@@ -11,6 +11,8 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.CropsBlock;
 import net.minecraft.block.IWaterLoggable;
+import net.minecraft.block.SoundType;
+import net.minecraft.block.material.Material;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.fluid.IFluidState;
 import net.minecraft.item.BlockItemUseContext;
@@ -40,8 +42,8 @@ public class RiceCropBlock extends CropsBlock implements IWaterLoggable {
 			Block.makeCuboidShape(0.0D, 0.0D, 0.0D, 16.0D, 14.0D, 16.0D),
 			Block.makeCuboidShape(0.0D, 0.0D, 0.0D, 16.0D, 16.0D, 16.0D) };
 
-	public RiceCropBlock(Properties builder) {
-		super(builder);
+	public RiceCropBlock() {
+		super(Block.Properties.create(Material.PLANTS).doesNotBlockMovement().tickRandomly().hardnessAndResistance(0.0F).sound(SoundType.CROP));
 		this.setDefaultState(this.stateContainer.getBaseState().with(this.getAgeProperty(), Integer.valueOf(0))
 				.with(WATERLOGGED, Boolean.valueOf(false)));
 	}
@@ -100,7 +102,7 @@ public class RiceCropBlock extends CropsBlock implements IWaterLoggable {
 
 	@Override
 	protected IItemProvider getSeedsItem() {
-		return ModItems.RICE_SEEDS;
+		return ModItems.RICE_SEEDS.get();
 	}
 
 	@Override
