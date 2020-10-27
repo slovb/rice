@@ -8,6 +8,7 @@ import com.slov.rice.init.ModItems;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.CropsBlock;
 import net.minecraft.block.IWaterLoggable;
 import net.minecraft.fluid.Fluids;
@@ -48,6 +49,10 @@ public class RiceCropBlock extends CropsBlock implements IWaterLoggable {
 	public BlockState withAgeWaterlogged(int age, boolean waterlogged) {
 		return super.withAge(age).with(WATERLOGGED, Boolean.valueOf(waterlogged));
 	}
+
+   protected boolean isValidGround(BlockState state, IBlockReader worldIn, BlockPos pos) {
+      return state.getBlock() == Blocks.FARMLAND || state.getBlock() == Blocks.DIRT;
+   }
 
 	public boolean isWaterlogged(BlockState state) {
 		return state.get(WATERLOGGED);
