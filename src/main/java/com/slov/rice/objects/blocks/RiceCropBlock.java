@@ -55,7 +55,10 @@ public class RiceCropBlock extends CropsBlock implements IWaterLoggable {
 	}
 
 	protected boolean isValidGround(BlockState state, IBlockReader worldIn, BlockPos pos) {
-		return state.getBlock() == Blocks.FARMLAND || state.getBlock() == Blocks.DIRT;
+		Block block = state.getBlock();
+		BlockState above = worldIn.getBlockState(pos.up());
+		int level = above.getFluidState().getLevel();
+		return (block == Blocks.FARMLAND || block == Blocks.DIRT) && level == 8;
 	}
 
 	public boolean isWaterlogged(BlockState state) {
