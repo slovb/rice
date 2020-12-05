@@ -1,12 +1,31 @@
 {
-    "variants": {
-        "age=0": { "model": "rice:block/rice_stage0" },
-        "age=1": { "model": "rice:block/rice_stage1" },
-        "age=2": { "model": "rice:block/rice_stage2" },
-        "age=3": { "model": "rice:block/rice_stage3" },
-        "age=4": { "model": "rice:block/rice_stage4" },
-        "age=5": { "model": "rice:block/rice_stage5" },
-        "age=6": { "model": "rice:block/rice_stage6" },
-        "age=7": { "model": "rice:block/rice_stage7" }
-    }
+    "multipart": [
+    	{	"when": { "half": "lower" },
+    		"apply": { "model": "rice:block/rice_lower" }
+    	},
+    	{	"when": { "half": "upper", "age": "0" },
+    		"apply": { "model": "rice:block/rice_stage0" }
+    	},
+    	{	"when": { "half": "upper", "age": "1" },
+    		"apply": { "model": "rice:block/rice_stage1" }
+    	},
+    	{	"when": { "half": "upper", "age": "2" },
+    		"apply": { "model": "rice:block/rice_stage2" }
+    	},
+    	{	"when": { "half": "upper", "age": "3" },
+    		"apply": { "model": "rice:block/rice_stage3" }
+    	},
+    	{	"when": { "half": "upper", "age": "4" },
+    		"apply": { "model": "rice:block/rice_stage4" }
+    	},
+    	{	"when": { "half": "upper", "age": "5" },
+    		"apply": { "model": "rice:block/rice_stage5" }
+    	},
+    	{	"when": { "half": "upper", "age": "6" },
+    		"apply": { "model": "rice:block/rice_stage6" }
+    	},
+    	{	"when": { "half": "upper", "age": "7" },
+    		"apply": { "model": "rice:block/rice_stage7" }
+    	}
+    ]
 }

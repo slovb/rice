@@ -2,7 +2,6 @@ package com.slov.rice.init;
 
 import com.slov.rice.Rice;
 import com.slov.rice.objects.blocks.RiceCropBlock;
-
 import net.minecraft.block.Block;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
