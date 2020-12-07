@@ -180,7 +180,6 @@ public class RiceCropBlock extends CropsBlock implements IWaterLoggable {
 
 	@Override
 	public void tick(BlockState state, World worldIn, BlockPos pos, Random random) {
-		//super.tick(state, worldIn, pos, random);
 		if (!worldIn.isAreaLoaded(pos, 1))
 			return; // Forge: prevent loading unloaded chunks when checking neighbor's light
 		if (this.isWaterlogged(state) ^ this.isLower(state)) { // XOR
