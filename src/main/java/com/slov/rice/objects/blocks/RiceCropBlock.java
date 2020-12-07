@@ -4,6 +4,7 @@ import java.util.Random;
 
 import javax.annotation.Nullable;
 
+import com.slov.rice.init.ModBlocks;
 import com.slov.rice.init.ModItems;
 
 import net.minecraft.block.Block;
@@ -73,28 +74,47 @@ public class RiceCropBlock extends CropsBlock implements IWaterLoggable {
 	public void onBlockPlacedBy(World worldIn, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
 		worldIn.setBlockState(pos.up(), this.getDefaultState().with(HALF, DoubleBlockHalf.UPPER), 3);
 	}
-	
+
 	public BlockState withUpdatedAge(int age, BlockState state) {
-		return super.withAge(age)
-				.with(WATERLOGGED, Boolean.valueOf(this.isWaterlogged(state)))
-				.with(HALF, state.get(HALF));
+		return super.withAge(age).with(WATERLOGGED, Boolean.valueOf(this.isWaterlogged(state))).with(HALF,
+				state.get(HALF));
 	}
 
 	protected boolean isValidGround(BlockState state, IBlockReader worldIn, BlockPos pos) {
 		Block block = state.getBlock();
+		if (!(block == Blocks.FARMLAND || block == Blocks.DIRT)) {
+			return false;
+		}
+
 		BlockState above = worldIn.getBlockState(pos.up());
 		int level = above.getFluidState().getLevel();
-		return (block == Blocks.FARMLAND || block == Blocks.DIRT) && level == 8;
+		if (level != 8) {
+			return false;
+		}
+
+		BlockState twoAbove = worldIn.getBlockState(pos.up(2));
+		int twoLevel = twoAbove.getFluidState().getLevel();
+		Block twoBlock = twoAbove.getBlock();
+		return (twoBlock == Blocks.AIR || twoBlock == ModBlocks.RICE_CROP.get()) && twoLevel == 0;
+	}
+
+	public boolean isUpper(BlockState state) {
+		return state.get(HALF) == DoubleBlockHalf.UPPER;
+	}
+
+	public boolean isLower(BlockState state) {
+		return !this.isUpper(state);
 	}
 
 	public boolean isValidPosition(BlockState state, IWorldReader worldIn, BlockPos pos) {
-		if (state.get(HALF) != DoubleBlockHalf.UPPER) {
+		if (this.isLower(state)) {
 			return super.isValidPosition(state, worldIn, pos);
 		} else {
 			BlockState blockstate = worldIn.getBlockState(pos.down());
-			if (state.getBlock() != this)
+			if (state.getBlock() != this) {
 				return super.isValidPosition(state, worldIn, pos);
-			return blockstate.getBlock() == this && blockstate.get(HALF) == DoubleBlockHalf.LOWER;
+			}
+			return blockstate.getBlock() == this && this.isLower(blockstate);
 		}
 	}
 
@@ -113,10 +133,16 @@ public class RiceCropBlock extends CropsBlock implements IWaterLoggable {
 	 */
 	public void onBlockHarvested(World worldIn, BlockPos pos, BlockState state, PlayerEntity player) {
 		DoubleBlockHalf doubleblockhalf = state.get(HALF);
-		BlockPos blockpos = doubleblockhalf == DoubleBlockHalf.LOWER ? pos.up() : pos.down();
+		BlockPos blockpos = this.isLower(state) ? pos.up() : pos.down();
 		BlockState blockstate = worldIn.getBlockState(blockpos);
 		if (blockstate.getBlock() == this && blockstate.get(HALF) != doubleblockhalf) {
-			worldIn.setBlockState(blockpos, Blocks.AIR.getDefaultState(), 35);
+			BlockState replacement;
+			if (this.isWaterlogged(blockstate)) {
+				replacement = Blocks.WATER.getDefaultState();
+			} else {
+				replacement = Blocks.AIR.getDefaultState();
+			}
+			worldIn.setBlockState(blockpos, replacement, 35);
 			worldIn.playEvent(player, 2001, blockpos, Block.getStateId(blockstate));
 			if (!worldIn.isRemote && !player.isCreative()) {
 				spawnDrops(state, worldIn, pos, (TileEntity) null, player, player.getHeldItemMainhand());
@@ -140,24 +166,47 @@ public class RiceCropBlock extends CropsBlock implements IWaterLoggable {
 		}
 
 		worldIn.setBlockState(pos, this.withUpdatedAge(i, state), 2);
+		if (this.isUpper(state)) { // grow stems
+			BlockState below = worldIn.getBlockState(pos.down());
+			if (below.getBlock() == ModBlocks.RICE_CROP.get()) {
+				worldIn.setBlockState(pos.down(), this.withUpdatedAge(i, below), 2);
+			}
+		}
+	}
+
+	public boolean canUseBonemeal(World worldIn, Random rand, BlockPos pos, BlockState state) {
+		return this.isUpper(state);
 	}
 
 	@Override
 	public void tick(BlockState state, World worldIn, BlockPos pos, Random random) {
-		super.tick(state, worldIn, pos, random);
+		//super.tick(state, worldIn, pos, random);
 		if (!worldIn.isAreaLoaded(pos, 1))
 			return; // Forge: prevent loading unloaded chunks when checking neighbor's light
-		if (!this.isWaterlogged(state) ^ state.get(HALF) == DoubleBlockHalf.UPPER) { // XOR
+		if (this.isWaterlogged(state) ^ this.isLower(state)) { // XOR
 			worldIn.destroyBlock(pos, true);
 		}
-		if (worldIn.getLightSubtracted(pos, 0) >= 9) {
-			int i = this.getAge(state);
-			if (i < this.getMaxAge()) {
-				float f = getGrowthChance(this, worldIn, pos);
-				if (net.minecraftforge.common.ForgeHooks.onCropsGrowPre(worldIn, pos, state,
-						random.nextInt((int) (25.0F / f) + 1) == 0)) {
-					worldIn.setBlockState(pos, this.withUpdatedAge(i + 1, state), 2);
-					net.minecraftforge.common.ForgeHooks.onCropsGrowPost(worldIn, pos, state);
+		if (this.isUpper(state)) {
+			if (worldIn.getLightSubtracted(pos, 0) >= 9) {
+				int i = this.getAge(state);
+				if (i < this.getMaxAge()) {
+					float f = getGrowthChance(this, worldIn, pos);
+					int newAge = i + 1;
+					boolean grow = random.nextInt((int) (25.0F / f) + 1) == 0;
+
+					if (net.minecraftforge.common.ForgeHooks.onCropsGrowPre(worldIn, pos, state, grow)) {
+						worldIn.setBlockState(pos, this.withUpdatedAge(newAge, state), 2);
+						net.minecraftforge.common.ForgeHooks.onCropsGrowPost(worldIn, pos, state);
+					}
+
+					if (this.isUpper(state)) { // grow stems
+						BlockState below = worldIn.getBlockState(pos.down());
+						if (below.getBlock() == ModBlocks.RICE_CROP.get() && net.minecraftforge.common.ForgeHooks
+								.onCropsGrowPre(worldIn, pos.down(), below, grow)) {
+							worldIn.setBlockState(pos.down(), this.withUpdatedAge(newAge, below), 2);
+							net.minecraftforge.common.ForgeHooks.onCropsGrowPost(worldIn, pos.down(), below);
+						}
+					}
 				}
 			}
 		}
@@ -210,7 +259,6 @@ public class RiceCropBlock extends CropsBlock implements IWaterLoggable {
 	 */
 	@OnlyIn(Dist.CLIENT)
 	public long getPositionRandom(BlockState state, BlockPos pos) {
-		return MathHelper.getCoordinateRandom(pos.getX(),
-				pos.down(state.get(HALF) == DoubleBlockHalf.LOWER ? 0 : 1).getY(), pos.getZ());
+		return MathHelper.getCoordinateRandom(pos.getX(), pos.down(this.isLower(state) ? 0 : 1).getY(), pos.getZ());
 	}
 }
