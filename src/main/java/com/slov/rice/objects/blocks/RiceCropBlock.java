@@ -125,7 +125,7 @@ public class RiceCropBlock extends CropsBlock implements IWaterLoggable {
 	@Override
 	public void grow(World world, BlockPos pos, BlockState state) {
 		int i = this.getAge(state) + this.getBonemealAgeIncrease(world);
-		this.changeAge(world, pos, state, i);
+		this.changeAge(world, pos, state, i, 0);
 	}
 
 	/**
@@ -139,37 +139,51 @@ public class RiceCropBlock extends CropsBlock implements IWaterLoggable {
 	
 	public void incrementAge(BlockState state, World world, BlockPos pos) {
 		int newAge = this.getAge(state) + 1;
-		this.changeAge(world, pos, state, newAge);
+		int ageReduction = state.get(AGE_REDUCTION);
+		this.changeAge(world, pos, state, newAge, ageReduction);
+	}
+	
+	public void incrementAgeReduction(BlockState state, World world, BlockPos pos) {
+		int newReduction = state.get(AGE_REDUCTION) + 1;
+		if (newReduction > this.getMaxAge()) {
+			newReduction = this.getMaxAge();
+		}
+		// if plant not fully grown just increment it to freeze the plant at current stage
+		if (state.get(AGE) < this.getMaxAge() - newReduction) {
+			newReduction = this.getMaxAge() - state.get(AGE);
+		}
+		this.changeAge(world, pos, state, state.get(AGE), newReduction);
 	}
 	
 	public void decrementAge(BlockState state, World world, BlockPos pos) {
 		int newAge = this.getAge(state) - 1;
-		this.changeAge(world, pos, state, newAge);
+		int ageReduction = state.get(AGE_REDUCTION);
+		this.changeAge(world, pos, state, newAge, ageReduction);
 	}
 	
 	public int getReducedMaxAge(BlockState state) {
-		return this.getMaxAge();// - state.get(AGE_REDUCTION);
+		return this.getMaxAge() - state.get(AGE_REDUCTION);
 	}
 	
-	public void changeAge(World world, BlockPos pos, BlockState state, int newAge) {
+	protected void changeAge(World world, BlockPos pos, BlockState state, int newAge, int ageReduction) {
 		// clamp
 		if (newAge < 0) {
 			newAge = 0;
 		}
-		if (newAge > this.getReducedMaxAge(state)) {
-			newAge = this.getReducedMaxAge(state);
+		if (newAge > this.getMaxAge() - ageReduction) {
+			newAge = this.getMaxAge() - ageReduction;
 		}
 		
-		world.setBlockState(pos, this.withUpdatedAge(newAge, state), 2);
+		world.setBlockState(pos, this.withUpdatedAge(newAge, ageReduction, state), 2);
 
 		// update other
 		if (this.isUpper(state)) { // grow stems
 			BlockState below = world.getBlockState(pos.down());
-			world.setBlockState(pos.down(), this.withUpdatedAge(newAge, below), 2);
+			world.setBlockState(pos.down(), this.withUpdatedAge(newAge, ageReduction, below), 2);
 		}
 		else if (this.isLower(state)) { // grow top
 			BlockState above = world.getBlockState(pos.up());
-			world.setBlockState(pos.up(), this.withUpdatedAge(newAge, above), 2);
+			world.setBlockState(pos.up(), this.withUpdatedAge(newAge, ageReduction, above), 2);
 		}
 	}
 
@@ -271,7 +285,7 @@ public class RiceCropBlock extends CropsBlock implements IWaterLoggable {
 					
 					// update block
 					if (net.minecraftforge.common.ForgeHooks.onCropsGrowPre(world, pos, state, grow)) {
-						world.setBlockState(pos, this.withUpdatedAge(newAge, state), 2);
+						world.setBlockState(pos, this.withUpdatedAge(newAge, state.get(AGE_REDUCTION), state), 2);
 						net.minecraftforge.common.ForgeHooks.onCropsGrowPost(world, pos, state);
 					}
 
@@ -280,7 +294,7 @@ public class RiceCropBlock extends CropsBlock implements IWaterLoggable {
 						BlockState below = world.getBlockState(pos.down());
 						if (below.getBlock() == ModBlocks.RICE_CROP.get() && net.minecraftforge.common.ForgeHooks
 								.onCropsGrowPre(world, pos.down(), below, grow)) {
-							world.setBlockState(pos.down(), this.withUpdatedAge(newAge, below), 2);
+							world.setBlockState(pos.down(), this.withUpdatedAge(newAge, state.get(AGE_REDUCTION), below), 2);
 							net.minecraftforge.common.ForgeHooks.onCropsGrowPost(world, pos.down(), below);
 						}
 					}
@@ -299,8 +313,8 @@ public class RiceCropBlock extends CropsBlock implements IWaterLoggable {
 		return super.updatePostPlacement(stateIn, facing, facingState, worldIn, currentPos, facingPos);
 	}
 
-	public BlockState withUpdatedAge(int age, BlockState state) {
+	public BlockState withUpdatedAge(int age, int ageReduction, BlockState state) {
 		return super.withAge(age).with(WATERLOGGED, Boolean.valueOf(this.isWaterlogged(state))).with(HALF,
-				state.get(HALF)).with(AGE_REDUCTION, state.get(AGE_REDUCTION));
+				state.get(HALF)).with(AGE_REDUCTION, ageReduction);
 	}
 }

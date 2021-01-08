@@ -35,7 +35,7 @@ public class RiceClipper extends Item {
 			PlayerEntity playerEntity = context.getPlayer();
 			world.playSound(playerEntity, blockPos, SoundEvents.ENTITY_SHEEP_SHEAR, SoundCategory.BLOCKS, 0.5F, 1.0F);
 			if (!world.isRemote) {
-				block.decrementAge(blockState, world, blockPos);
+				block.incrementAgeReduction(blockState, world, blockPos);
 			}
 			return ActionResultType.SUCCESS;
 		}
