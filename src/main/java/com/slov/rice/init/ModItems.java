@@ -1,6 +1,7 @@
 package com.slov.rice.init;
 
 import com.slov.rice.Rice;
+import com.slov.rice.objects.items.RiceClipper;
 import com.slov.rice.objects.items.RiceSeedsItem;
 
 import net.minecraft.item.Item;
@@ -13,4 +14,5 @@ public class ModItems {
 	public static final DeferredRegister<Item> ITEMS = new DeferredRegister<>(ForgeRegistries.ITEMS, Rice.MODID);
 
 	public static final RegistryObject<Item> RICE_SEEDS = ITEMS.register("rice_seeds", RiceSeedsItem::new);
+	public static final RegistryObject<Item> RICE_CLIPPER = ITEMS.register("rice_clipper", RiceClipper::new);
 }
